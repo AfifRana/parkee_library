@@ -22,7 +22,7 @@ CREATE TABLE books (
 	CONSTRAINT books_stock_check CHECK ((stock >= 0))
 );
 
-CREATE TABLE public.borrowers (
+CREATE TABLE borrowers (
 	id bigserial NOT NULL,
 	ktp_number varchar(255) NOT NULL,
 	"name" varchar(255) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE public.borrowers (
 	CONSTRAINT borrowers_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE public.borrowings (
+CREATE TABLE borrowings (
 	id bigserial NOT NULL,
 	borrower_id int8 NOT NULL,
 	book_id int8 NOT NULL,
