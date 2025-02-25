@@ -20,16 +20,24 @@ public class BookService {
         this.bookRepository = bookRepository;
     }
 
-    public List<Book> getAllBook() {
-        return bookRepository.findAll();
+    public List<Book> getBooks(String title) {
+        if (title != null && !title.isBlank()) {
+            return getBookByTitleContaining(title);
+        } else {
+            return bookRepository.findAll();
+        }
+    }
+
+    public Book getBookById(Long id) {
+        return bookRepository.findById(id).orElse(null);
     }
 
     public Book getBookByIsbn(String isbn) {
         return bookRepository.findByIsbn(isbn).orElse(null);
     }
 
-    public Book getBookByTitle(String title) {
-        return bookRepository.findByTitle(title).orElse(null);
+    public List<Book> getBookByTitleContaining(String title) {
+        return bookRepository.findByTitleContaining(title);
     }
 
     public Book addBook(NewBookRq newBookRq) {
@@ -41,6 +49,17 @@ public class BookService {
     }
 
     public Book updateBook(Book book) {
+        return bookRepository.save(book);
+    }
+
+    public Book updateBookStock(Long id, int stock) {
+        Book book = bookRepository.findById(id).orElse(null);
+
+        if (book == null) {
+            return null;
+        }
+
+        book.setStock(stock);
         return bookRepository.save(book);
     }
 }

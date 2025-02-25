@@ -1,5 +1,6 @@
 package com.parkee.library_management.service;
 
+import com.parkee.library_management.exception.BusinessException;
 import com.parkee.library_management.model.entity.Book;
 import com.parkee.library_management.model.entity.Borrower;
 import com.parkee.library_management.model.entity.Borrowing;
@@ -46,20 +47,20 @@ public class BorrowingService {
         return borrowingRepository.findById(borrowingId).orElse(new Borrowing());
     }
 
-    public Borrowing addBorrowing(NewBorrowingRq newBorrowingRq) {
+    public Borrowing addBorrowing(NewBorrowingRq newBorrowingRq) throws BusinessException {
         // Check if the books are available
         if (bookService.getBookByIsbn(newBorrowingRq.getBookIsbn()).getStock() < 2) {
-            throw new RuntimeException("Book with ISBN " + newBorrowingRq.getBookIsbn() + " is not available to borrow");
+            throw new BusinessException("Book with ISBN " + newBorrowingRq.getBookIsbn() + " is not available to borrow");
         }
 
         // Borrower only can have 1 active borrowing
         if (!borrowingRepository.findByBorrowerIdAndStatus(newBorrowingRq.getBorrowerId(), Borrowing.Status.BORROWED).isEmpty()) {
-            throw new RuntimeException("Borrower with ID " + newBorrowingRq.getBorrowerId() + " already has an active borrowing");
+            throw new BusinessException("Borrower with ID " + newBorrowingRq.getBorrowerId() + " already has an active borrowing");
         }
 
         // The maximum duration for borrowing books is 30 days
         if (GeneralUtility.isMoreThan30DaysFromNow(newBorrowingRq.getReturnDeadline())) {
-            throw new RuntimeException("The maximum duration for borrowing books is 30 days");
+            throw new BusinessException("The maximum duration for borrowing books is 30 days");
         }
 
         // Retrieve book
@@ -68,6 +69,9 @@ public class BorrowingService {
         // Retrieve borrower
         Borrower borrower = borrowerService.getBorrowerById(newBorrowingRq.getBorrowerId());
 
+        // Update book stock
+        bookService.updateBookStock(book.getId(), book.getStock() - 1);
+
         Borrowing borrowing = new Borrowing();
         borrowing.setBorrower(borrower);
         borrowing.setBook(book);
@@ -75,10 +79,11 @@ public class BorrowingService {
         borrowing.setReturnDeadline(newBorrowingRq.getReturnDeadline());
         borrowing.setStatus(Borrowing.Status.BORROWED);
         borrowingRepository.save(borrowing);
-        return borrowingRepository.save(borrowing);
+
+        return borrowing;
     }
 
-    public Borrowing updateBorrowing(Long borrowingId) {
+    public Borrowing finishBorrowing(Long borrowingId) {
         Borrowing borrowing = borrowingRepository.findById(borrowingId).orElse(new Borrowing());
         LocalDate currentDate = LocalDate.now();
 
@@ -87,6 +92,8 @@ public class BorrowingService {
         } else {
             borrowing.setStatus(Borrowing.Status.RETURNED);
         }
+        borrowing.setReturnDate(currentDate);
+        bookService.updateBookStock(borrowing.getBook().getId(), borrowing.getBook().getStock() + 1);
 
         return borrowingRepository.save(borrowing);
     }

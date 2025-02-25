@@ -5,6 +5,7 @@ import com.parkee.library_management.model.entity.Borrower;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Optional;
  */
 @Repository
 public interface BorrowerRepository extends JpaRepository<Borrower, Long> {
-    Optional<Borrower> findByName(String name);
+    List<Borrower> findByNameContaining(String name);
     Optional<Borrower> findByKtpNumber(String ktpNumber);
 }
 

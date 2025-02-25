@@ -1,6 +1,5 @@
 package com.parkee.library_management.service;
 
-import com.parkee.library_management.model.entity.Book;
 import com.parkee.library_management.model.entity.Borrower;
 import com.parkee.library_management.model.request.NewBorrowerRq;
 import com.parkee.library_management.repository.BorrowerRepository;
@@ -21,16 +20,24 @@ public class BorrowerService {
         this.borrowerRepository = borrowerRepository;
     }
 
-    public List<Borrower> getAllBorrower() {
-        return borrowerRepository.findAll();
+    public List<Borrower> getBorrowers(String borrowerName) {
+        if (borrowerName != null && !borrowerName.isBlank()) {
+            return getBorrowerByNameContaining(borrowerName);
+        } else {
+            return borrowerRepository.findAll();
+        }
     }
 
     public Borrower getBorrowerById(Long id) {
         return borrowerRepository.findById(id).orElse(null);
     }
 
-    public Borrower getBorrowerByName(String name) {
-        return borrowerRepository.findByName(name).orElse(null);
+    public Borrower getBorrowerByKtpNumber(String ktpNumber) {
+        return borrowerRepository.findByKtpNumber(ktpNumber).orElse(null);
+    }
+
+    public List<Borrower> getBorrowerByNameContaining(String name) {
+        return borrowerRepository.findByNameContaining(name);
     }
 
     public Borrower addBorrower(NewBorrowerRq newBorrowerRq) {
@@ -38,6 +45,10 @@ public class BorrowerService {
         borrower.setName(newBorrowerRq.getName());
         borrower.setKtpNumber(newBorrowerRq.getKtpNumber());
         borrower.setEmail(newBorrowerRq.getEmail());
+        return borrowerRepository.save(borrower);
+    }
+
+    public Borrower updateBorrower(Borrower borrower) {
         return borrowerRepository.save(borrower);
     }
 }
