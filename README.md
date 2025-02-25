@@ -1,5 +1,14 @@
 # Getting Started
 
+### Starting The Application
+1. Prepare the database
+2. Input user and password in `application.properties`
+3. Run the following command to start the application:
+    ```shell
+    mvn spring-boot:run
+    ```
+4. Open the browser and go to `http://localhost:8080/swagger-ui.html` to test the API
+
 ### DDL
 
 ```sql
